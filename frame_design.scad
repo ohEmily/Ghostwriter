@@ -7,19 +7,26 @@ protruding_loop_rad = inner_loop_rad - 2;
 loop_height = unit * 3;
 frame_offset = loop_height / 12;
 
+module circular_hole()
+{
+	cylinder(h = loop_height, r = inner_loop_rad, center = true); 
+}
+
+module square_hole()
+{
+	cube(size = [inner_loop_rad, inner_loop_rad, loop_height], center = true);
+}
+
 module loop()
 {
 	translate([0, frame_offset, 0]) rotate([90,0,0]) {
 		difference() {
 			cylinder(h = loop_height, r = outer_loop_rad, 
 				center = true);
-			cylinder(h = loop_height, r = inner_loop_rad, 
-				center = true);
+			square_hole(); //circular_hole();
 		}
 	}
 }
-
-loop();
 
 // frame vars
 frame_length_long = unit * 22; // 11 inches
@@ -49,15 +56,27 @@ module frame_long_side() {
 
 frame_long_side();
 
+module circular_protrusion()
+{
+	translate([0, 0, loop_height])
+		cylinder(h = loop_height, r = protruding_loop_rad, 
+			center = true);
+}
+
+module square_protrusion()
+{
+	translate([0, 0, loop_height])
+		square_hole();
+}
+
+
 module loop_protruding()
 {
 		translate([0, frame_offset, 0]) rotate([90,0,0]) {
-		union() {
-			cylinder(h = loop_height, r = outer_loop_rad, 
-				center = true);
-			translate([0, 0, loop_height])
-				cylinder(h = loop_height, r = protruding_loop_rad, 
+			union() {
+				cylinder(h = loop_height, r = outer_loop_rad, 
 					center = true);
+				square_protrusion(); // circular_protrusion();
 		}
 	}
 }
