@@ -1,9 +1,10 @@
 unit = 10;
+padding = 1;
 
 // loop vars
 outer_loop_rad = unit * 1.5;
 inner_loop_rad = outer_loop_rad / 2;
-protruding_loop_rad = inner_loop_rad - 2;
+protruding_loop_rad = inner_loop_rad - padding;
 loop_height = unit * 3;
 frame_offset = loop_height / 12;
 
@@ -23,7 +24,7 @@ module loop()
 		difference() {
 			cylinder(h = loop_height, r = outer_loop_rad, 
 				center = true);
-			square_hole(); //circular_hole();
+			square_hole(); 
 		}
 	}
 }
@@ -69,7 +70,6 @@ module square_protrusion()
 		square_hole();
 }
 
-
 module loop_protruding()
 {
 		translate([0, frame_offset, 0]) rotate([90,0,0]) {
@@ -83,15 +83,49 @@ module loop_protruding()
 
 module frame_short_side()
 {
-	translate([100, 0, 0]) {
-		union() {
+	union() {
+		loop_protruding();
+		frame(frame_length_short);
+		translate([0, 0, -1 * (frame_length_short + protruding_loop_rad * 2)])
 			loop_protruding();
-			frame(frame_length_short);
-			translate([0, 0, -1 * (frame_length_short + protruding_loop_rad * 2)])
-				loop_protruding();
-			
-		}
 	}
 }
 
-frame_short_side();
+translate([100, 0, 0]) {
+	frame_short_side();
+}
+
+// slider vars
+middle_gripper = rail_width - padding;
+side_grippers = rail_width;
+frame_depth = frame_height * 2;
+
+module slider_head()
+{
+	union() {
+		cube([frame_width, frame_height, frame_height], center = true);
+		translate([0, frame_height / 2, 0]) {
+			cube([middle_gripper, frame_height * 2, frame_height], center = true);
+			translate([frame_width / 2, 0, 0])
+				cube([middle_gripper, frame_height * 2, frame_height], center = true);
+			translate([ -1 * frame_width / 2, 0, 0])
+				cube([middle_gripper, frame_height * 2, frame_height], center = true);
+		}	
+	}
+}
+
+module slider(frame_len)
+{
+	translate([200, 0, 0]) rotate([0, 90, 0]) {
+		slider_head();
+		translate([frame_len / 2, 0, 0])
+			cube([frame_len, frame_height, frame_height], center = true);
+		translate([frame_len, 0, 0])
+			slider_head();
+	}
+}
+
+slider(frame_length_long);
+
+translate([100, 0, 0])
+	slider(frame_length_short);
